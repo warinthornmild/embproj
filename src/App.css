@@ -30,3 +30,24 @@
     transform: rotate(360deg);
   }
 }
+
+.header {
+  background-color: #8b8378;
+  text-align: center;
+  padding: 20px;
+  height: 30%;
+  font-size: 40px;
+  color: #ffff;
+  font-family: 'Quicksand', sans-serif;
+}
+
+.map-button {
+  margin: 1px;
+  width: 60px;
+  height: 60px;
+  font-size: 30px;
+}
+
+.map {
+  text-align: center;
+}
