@@ -11,11 +11,13 @@ const SECRET = "h8qLFzNtf20g01ljpfNHdcUmc";
 const ALIAS = "my_server";     //  ชื่อตัวเอง
 const thing1 = "esp8266";         //  ชื่ออุปกรณ์ปลายทางที่จะคุย
 
-var microgear = Microgear.create({
+const MicroGear = require('microgear')
+const microgear = MicroGear.create({
   key: KEY,
   secret: SECRET,
   alias : ALIAS
 });
+microgear.connect(APPID);
 
 class ParkingMap extends Component {
   constructor(props) {
@@ -29,30 +31,38 @@ class ParkingMap extends Component {
     this.fetchAvailable = this.fetchAvailable.bind(this);
     this.postRent = this.postRent.bind(this);
     microgear.on('message', async(topic, body) => {
-      const str = body.split(' ')
-      this.setState({data:str})
+      // console.log("55 " + typeof(body) + " " + body);
+      const lst = [];
+      for(let i = 0; body[i] != 69; i++){
+        if(body[i] != 32){
+          lst.push(String.fromCharCode(body[i]));
+        }
+        // console.log(lst);
+      }
+      this.setState({data:lst});
     })
   }
 
   componentDidMount() {
-    this.fetchAvailable();
+    // this.fetchAvailable().catch((error)=>{console.log(error)});
   }
 
   async fetchAvailable() {
+    console.log('heyyy');
     microgear.chat(thing1,'q');
-    
     const data = this.state.data;
     //const data = await axios.get('');
     this.setState({ Available: data });
     console.log(data);
   }
 
+
+
   async postRent(val) {
     const res = await axios.post('', val);
   }
 
-  onFormSubmit(event) {
-    event.preventDefault();
+  onFormSubmit() {
 
     // We need to and fetch weather data
     console.log(this.state.Available);
@@ -60,14 +70,13 @@ class ParkingMap extends Component {
 
     if (this.state.selected == null) alert('You did not do anything');
     else alert('You have rent number' + this.state.selected);
-    window.location = '/';
     microgear.chat(thing1,'b ' + this.state.selected);
+    this.fetchAvailable();
   }
 
   render() {
     return (
-      <form
-        onSubmit={this.onFormSubmit}
+      <div
         style={{ display: 'block', padding: '10%' }}
       >
         <div className="map">
@@ -657,10 +666,13 @@ class ParkingMap extends Component {
             </div>
           </div>
         </div>
-        <button type="submit" class="btn btn-primary" style={{ margin: '5%' }}>
+        <button class="btn btn-primary" style={{ margin: '5%' }} onClick={()=>this.fetchAvailable()}>
+          Refresh
+        </button>
+        <button class="btn btn-primary" style={{ margin: '5%' }} onClick={() => this.onFormSubmit()}>
           Submit
         </button>
-      </form>
+      </div>
     );
   }
 }
