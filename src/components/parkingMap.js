@@ -1,17 +1,37 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { confirmAlert } from 'react-confirm-alert';
+import Microgear from 'microgear'
+
+
+const APPID = "EmbeddedLab";
+const KEY = "lHmvuXtwVaRHoBZ";
+const SECRET = "h8qLFzNtf20g01ljpfNHdcUmc";
+
+const ALIAS = "my_server";     //  ชื่อตัวเอง
+const thing1 = "esp8266";         //  ชื่ออุปกรณ์ปลายทางที่จะคุย
+
+var microgear = Microgear.create({
+  key: KEY,
+  secret: SECRET,
+  alias : ALIAS
+});
 
 class ParkingMap extends Component {
   constructor(props) {
     super(props);
-    this.state = {
+    this.state = { 
       Available: [],
-      selected: null
+      selected: null,
+      data: []
     };
     this.onFormSubmit = this.onFormSubmit.bind(this);
     this.fetchAvailable = this.fetchAvailable.bind(this);
     this.postRent = this.postRent.bind(this);
+    microgear.on('message', async(topic, body) => {
+      const str = body.split(' ')
+      this.setState({data:str})
+    })
   }
 
   componentDidMount() {
@@ -19,7 +39,9 @@ class ParkingMap extends Component {
   }
 
   async fetchAvailable() {
-    const data = ['1', '2'];
+    microgear.chat(thing1,'q');
+    
+    const data = this.state.data;
     //const data = await axios.get('');
     this.setState({ Available: data });
     console.log(data);
@@ -39,6 +61,7 @@ class ParkingMap extends Component {
     if (this.state.selected == null) alert('You did not do anything');
     else alert('You have rent number' + this.state.selected);
     window.location = '/';
+    microgear.chat(thing1,'b ' + this.state.selected);
   }
 
   render() {
